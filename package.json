@@ -1,0 +1,28 @@
+{
+  "name": "emojikey-server",
+  "version": "0.1.0",
+  "description": "MCP Protocol for persisting LLM interaction style as emojikeys",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "emojikey-server": "./build/index.js"
+  },
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "prepare": "npm run build",
+    "watch": "tsc --watch",
+    "inspector": "npx @modelcontextprotocol/inspector build/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.6.0",
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.9",
+    "typescript": "^5.7.2"
+  }
+}
