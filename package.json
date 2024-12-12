@@ -1,15 +1,17 @@
 {
-  "name": "emojikey-server",
+  "name": "@identimoji/mcp-server-emojikey",
   "version": "0.1.0",
   "description": "MCP Protocol for persisting LLM interaction style as emojikeys",
-  "private": true,
   "type": "module",
   "bin": {
-    "emojikey-server": "./build/index.js"
+    "mcp-server-emojikey": "./build/index.js"
   },
   "files": [
     "build"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
     "prepare": "npm run build",
