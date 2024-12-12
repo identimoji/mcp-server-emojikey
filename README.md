@@ -4,6 +4,17 @@ MCP Protocol for persisting LLM interaction style as emojikeys
 
 This server allows LLMs to maintain consistent interaction styles across conversations using emoji-based context keys ("emojikeys").
 
+Emojikeys are stored online, so you can use them accross devices and applications. No user information is stored other than the emojikeys.
+
+If there is interest in a local-only version, or other suggestions, please reach out and let me know. Actively developing this concept now.
+
+> 📝 **Note**
+> Usage note: The first time you use the tool in Claude desktop, tell Claude to "Set emojikey" then next time you start a conversation, he will automatically use this key. You can ask to set vibe, or show emojikey history as well. Have fun!
+
+
+> ⚠️ **Warning**
+> This is a beta version, more features are planned, so the API may change.
+
 ## Features
 
 ### Emojikey Management
@@ -30,11 +41,11 @@ On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
 ```json
 {
   "mcpServers": {
-    "emojikey": {
+    "mcp-server-emojikey": {
       "command": "npx",
-      "args": ["@modelcontextprotocol/server-emojikey"],
+      "args": ["@identimoji/mcp-server-emojikey"],
       "env": {
-        "EMOJIKEYIO_API_KEY": "your-api-key",
+        "EMOJIKEYIO_API_KEY": "your-api-key-goes-here", //get it from emojikey.io
         "MODEL_ID": "Claude-3-5-Sonnet-20241022"
       }
     }
