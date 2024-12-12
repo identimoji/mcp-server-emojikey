@@ -2,28 +2,45 @@
 
 MCP Protocol for persisting LLM interaction style as emojikeys
 
-This is a TypeScript-based MCP server that implements a simple notes system. It demonstrates core MCP concepts by providing:
-
-- Resources representing text notes with URIs and metadata
-- Tools for creating new notes
-- Prompts for generating summaries of notes
+This server allows LLMs to maintain consistent interaction styles across conversations using emoji-based context keys ("emojikeys").
 
 ## Features
 
-### Resources
-- List and access notes via `note://` URIs
-- Each note has a title, content and metadata
-- Plain text mime type for simple content access
+### Emojikey Management
+- Get current emojikey for a user/model combination
+- Set new emojikeys during conversations
+- Retrieve emojikey history
+- Automatic API key generation and validation
 
 ### Tools
-- `create_note` - Create new text notes
-  - Takes title and content as required parameters
-  - Stores note in server state
+- `initialize_conversation` - Get current emojikey at start of conversation
+- `get_emojikey` - Retrieve current emojikey
+- `set_emojikey` - Update the emojikey
+- `get_emojikey_history` - View previous emojikeys
 
-### Prompts
-- `summarize_notes` - Generate a summary of all stored notes
-  - Includes all note contents as embedded resources
-  - Returns structured prompt for LLM summarization
+## Installation
+
+1. Get your API key from [emojikey.io](https://emojikey.io)
+
+2. Add the server config to Claude Desktop:
+
+On MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "emojikey": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-emojikey"],
+      "env": {
+        "EMOJIKEYIO_API_KEY": "your-api-key",
+        "MODEL_ID": "Claude-3-5-Sonnet-20241022"
+      }
+    }
+  }
+}
+```
 
 ## Development
 
@@ -42,29 +59,22 @@ For development with auto-rebuild:
 npm run watch
 ```
 
-## Installation
-
-To use with Claude Desktop, add the server config:
-
-On MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
-
-```json
-{
-  "mcpServers": {
-    "emojikey-server": {
-      "command": "/path/to/emojikey-server/build/index.js"
-    }
-  }
-}
+Test the server:
+```bash
+npm run test
 ```
+
+### Environment Variables
+
+- `EMOJIKEYIO_API_KEY` - Your emojikey.io API key
+- `MODEL_ID` - Identifier for the LLM model (e.g., "Claude-3-5-Sonnet-20241022")
 
 ### Debugging
 
-Since MCP servers communicate over stdio, debugging can be challenging. We recommend using the [MCP Inspector](https://github.com/modelcontextprotocol/inspector), which is available as a package script:
+Since MCP servers communicate over stdio, debugging can be challenging. We recommend:
 
+1. Using the test script: `npm run test`
+2. Using the [MCP Inspector](https://github.com/modelcontextprotocol/inspector):
 ```bash
 npm run inspector
 ```
-
-The Inspector will provide a URL to access debugging tools in your browser.

@@ -1,5 +1,5 @@
 export interface Emojikey {
-  key: string;
+  emojikey: string;
   modelId: string;
   userId: string;
   timestamp: string;
