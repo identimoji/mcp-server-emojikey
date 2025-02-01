@@ -19,12 +19,12 @@ export class SupabaseEmojikeyService implements EmojikeyService {
 
   private async getUserIdFromApiKey(apiKey: string): Promise<string> {
     try {
-      console.log("Checking API key:", apiKey);
+      // console.error("Checking API key");
       const { data, error } = await this.supabase.rpc("check_api_key", {
         check_key: apiKey,
       });
 
-      console.log("Query result:", { data, error });
+      // console.error("Query result received");
 
       if (error) throw new EmojikeyError("Invalid API key");
       if (!data) throw new EmojikeyError("API key not found");
@@ -32,26 +32,23 @@ export class SupabaseEmojikeyService implements EmojikeyService {
       return data;
     } catch (err) {
       const error = err as Error;
-      throw new EmojikeyError(`API key validation failed: ${error.message}`);
+      throw new EmojikeyError("API key validation failed: ${error.message}");
     }
   }
 
   async getEmojikey(apiKey: string, modelId: string): Promise<Emojikey> {
     try {
       const userId = await this.getUserIdFromApiKey(apiKey);
-      console.log("Got userId:", userId);
+      // console.error("Got userId");
 
-      console.log("Calling RPC with params:", {
-        input_user_id: userId,
-        input_model: modelId,
-      });
+      // console.error("Calling RPC");
 
       const { data, error } = await this.supabase.rpc("get_user_emojikeys", {
         input_user_id: userId,
         input_model: modelId,
       });
 
-      console.log("RPC response:", { data, error });
+      // console.error("RPC response received");
 
       if (error)
         throw new EmojikeyError("Failed to get emojikey: " + error.message);
@@ -66,7 +63,7 @@ export class SupabaseEmojikeyService implements EmojikeyService {
       };
     } catch (err) {
       const error = err as Error;
-      throw new EmojikeyError(`Emojikey retrieval failed: ${error.message}`);
+      throw new EmojikeyError("Emojikey retrieval failed: ${error.message}");
     }
   }
 
@@ -77,7 +74,7 @@ export class SupabaseEmojikeyService implements EmojikeyService {
   ): Promise<void> {
     try {
       const userId = await this.getUserIdFromApiKey(apiKey);
-      console.log("Setting emojikey:", { userId, modelId, emojikey });
+      // console.error("Setting emojikey");
 
       const { error } = await this.supabase.rpc("set_user_emojikey", {
         input_user_id: userId,
@@ -89,7 +86,7 @@ export class SupabaseEmojikeyService implements EmojikeyService {
         throw new EmojikeyError("Failed to set emojikey: " + error.message);
     } catch (err) {
       const error = err as Error;
-      throw new EmojikeyError(`Emojikey update failed: ${error.message}`);
+      throw new EmojikeyError("Emojikey update failed: ${error.message}");
     }
   }
 
@@ -100,7 +97,7 @@ export class SupabaseEmojikeyService implements EmojikeyService {
   ): Promise<Emojikey[]> {
     try {
       const userId = await this.getUserIdFromApiKey(apiKey);
-      console.log("Getting history:", { userId, modelId, limit });
+      // console.error("Getting history");
 
       const { data, error } = await this.supabase.rpc(
         "get_user_emojikey_history",
@@ -124,7 +121,7 @@ export class SupabaseEmojikeyService implements EmojikeyService {
     } catch (err) {
       const error = err as Error;
       throw new EmojikeyError(
-        `Emojikey history retrieval failed: ${error.message}`,
+        "Emojikey history retrieval failed: ${error.message}",
       );
     }
   }

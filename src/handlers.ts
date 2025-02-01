@@ -18,6 +18,7 @@ export function setupToolHandlers(
     const apiKey = process.env.EMOJIKEYIO_API_KEY;
     const modelId = MODEL_CONFIG.ID; // Get model ID from config
 
+    console.error('Received apiKey:', apiKey);
     if (!apiKey) {
       throw new McpError(ErrorCode.InvalidParams, "API key not configured");
     }
@@ -69,7 +70,7 @@ export function setupToolHandlers(
       default:
         throw new McpError(
           ErrorCode.MethodNotFound,
-          `Unknown tool: ${request.params.name}`,
+          "Unknown tool: ${request.params.name}",
         );
     }
   });

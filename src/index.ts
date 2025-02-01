@@ -5,14 +5,14 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
 // Import our configuration and server components
-import { SERVER_CONFIG, SUPABASE_CONFIG } from "./config.js";
+import { SERVER_CONFIG } from "./config.js";
 import { setupToolHandlers } from "./handlers.js";
-import { SupabaseEmojikeyService } from "./service.supabase.js";
+import { LocalEmojikeyService } from "./service.local.js";
 
 // Main server class that coordinates everything
 class EmojikeyServer {
   private server: Server;
-  private emojikeyService: SupabaseEmojikeyService;
+  private emojikeyService: LocalEmojikeyService;
 
   constructor() {
     this.server = new Server(
@@ -25,20 +25,18 @@ class EmojikeyServer {
       },
     );
 
-    // Create our Supabase service instance
-    this.emojikeyService = new SupabaseEmojikeyService();
+    // Create our local storage service instance
+    this.emojikeyService = new LocalEmojikeyService();
 
     // Set up error handling and handlers
     this.setup();
   }
 
-  // Initialize all server components
   private setup(): void {
     this.setupErrorHandling();
     setupToolHandlers(this.server, this.emojikeyService);
   }
 
-  // Set up error handlers for the server and process
   private setupErrorHandling(): void {
     // Log MCP-specific errors
     this.server.onerror = (error) => {
@@ -52,7 +50,6 @@ class EmojikeyServer {
     });
   }
 
-  // Start the server using stdio transport
   async run(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
