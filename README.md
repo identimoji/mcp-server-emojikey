@@ -8,6 +8,10 @@ Emojikeys are stored online, so you can use them accross devices and application
 
 If there is interest in a local-only version, or other suggestions, please reach out and let me know. Actively developing this concept now.
 
+<a href="https://glama.ai/mcp/servers/e042rg25ct">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/e042rg25ct/badge" alt="emojikey-server Server MCP server" />
+</a>
+
 > 📝 **Note**
 > Usage note: The first time you use the tool in Claude desktop, tell Claude to "Set emojikey" then next time you start a conversation, he will automatically use this key. You can ask to set vibe, or show emojikey history as well. Have fun!
 
@@ -35,7 +39,7 @@ If there is interest in a local-only version, or other suggestions, please reach
 
 2. Add the server config to Claude Desktop:
 
-On MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+On MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json`  
 On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
 
 ```json
