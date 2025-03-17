@@ -6,7 +6,7 @@ export interface EmojikeyService {
   getEmojikey(userId: string, modelId: string): Promise<Emojikey>;
 
   // Set new emojikey (from user command or AI context update)
-  setEmojikey(userId: string, modelId: string, emojikey: string): Promise<void>;
+  setEmojikey(userId: string, modelId: string, emojikey: string, emojikey_type?: "normal" | "super"): Promise<void>;
 
   // Get history of emojikeys with optional limit
   getEmojikeyHistory(
@@ -14,6 +14,14 @@ export interface EmojikeyService {
     modelId: string,
     limit?: number,
   ): Promise<Emojikey[]>;
+  
+  // Get a combined history of recent keys and superkeys
+  getEnhancedEmojikeyHistory(
+    userId: string,
+    modelId: string,
+    normalKeyLimit?: number,
+    superKeyLimit?: number,
+  ): Promise<{superkeys: Emojikey[], recentKeys: Emojikey[]}>;
 }
 
 // Error class for emojikey-specific errors

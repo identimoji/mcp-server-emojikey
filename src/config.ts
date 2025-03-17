@@ -17,7 +17,7 @@ export const MODEL_CONFIG = {
 // Server configuration
 export const SERVER_CONFIG = {
   NAME: "emojikey-server",
-  VERSION: "0.1.0",
+  VERSION: "0.2.0",
   CAPABILITIES: {
     resources: {},
     tools: {},

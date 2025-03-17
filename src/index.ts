@@ -7,12 +7,12 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 // Import our configuration and server components
 import { SERVER_CONFIG } from "./config.js";
 import { setupToolHandlers } from "./handlers.js";
-import { LocalEmojikeyService } from "./service.local.js";
+import { SupabaseEmojikeyService } from "./service.supabase.js";
 
 // Main server class that coordinates everything
 class EmojikeyServer {
   private server: Server;
-  private emojikeyService: LocalEmojikeyService;
+  private emojikeyService: SupabaseEmojikeyService;
 
   constructor() {
     this.server = new Server(
@@ -25,8 +25,8 @@ class EmojikeyServer {
       },
     );
 
-    // Create our local storage service instance
-    this.emojikeyService = new LocalEmojikeyService();
+    // Create our Supabase storage service instance
+    this.emojikeyService = new SupabaseEmojikeyService();
 
     // Set up error handling and handlers
     this.setup();

@@ -9,7 +9,7 @@ async function test() {
     console.log("\n=== Testing Get Emojikey ===");
     const result = await service.getEmojikey(
       "ek_test123",
-      "Claude-3-5-Sonnet-20241022",
+      "Claude-3-7-Sonnet-20250219",
     );
     console.log("Get Success:", result);
 
@@ -17,7 +17,7 @@ async function test() {
     const newEmojikey = "🎯🌟🚀✨💫"; // Test emoji sequence
     await service.setEmojikey(
       "ek_test123",
-      "Claude-3-5-Sonnet-20241022",
+      "Claude-3-7-Sonnet-20250219",
       newEmojikey,
     );
     console.log("Set Success: Emojikey created");
@@ -25,7 +25,7 @@ async function test() {
     console.log("\n=== Testing Get History ===");
     const history = await service.getEmojikeyHistory(
       "ek_test123",
-      "Claude-3-5-Sonnet-20241022",
+      "Claude-3-7-Sonnet-20250219",
       5,
     );
     console.log("History Success:", history);

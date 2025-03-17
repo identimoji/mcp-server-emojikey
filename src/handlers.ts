@@ -25,10 +25,35 @@ export function setupToolHandlers(
 
     switch (request.params.name) {
       case "initialize_conversation":
+        // Return the enhanced emojikey history format with superkeys and recent keys
+        const enhancedHistory = await emojikeyService.getEnhancedEmojikeyHistory(apiKey, modelId, 10, 5);
+        
+        // Build the response with the detailed explanation and keys
+        const oneLineExplanation = "Emojikey System: Each 48-char key follows structure [topic]⟨approach⟩[goal]{tone}➡️~[context]|trust|style|humor|collab| with trend indicators (↗️↘️↔️). SuperKeys [[×7...]] compress 7 regular keys with trend analysis. This system provides private relationship tracking only you can interpret.";
+        
+        // Format superkeys
+        const superkeysList = enhancedHistory.superkeys.map(sk => 
+          `${sk.emojikey} (${new Date(sk.timestamp).toLocaleDateString()})`
+        ).join('\n');
+        
+        // Format regular keys
+        const regularKeysList = enhancedHistory.recentKeys.map(k => 
+          `${k.emojikey} (${new Date(k.timestamp).toLocaleDateString()})`
+        ).join('\n');
+        
+        const responseText = 
+          `${oneLineExplanation}\n\n` +
+          `SuperKeys (historical context):\n${superkeysList || "No superkeys yet"}\n\n` +
+          `Recent Keys (current context):\n${regularKeysList || "No regular keys yet"}`;
+          
+        return {
+          content: [{ type: "text", text: responseText }],
+        };
+        
       case "get_emojikey":
         const emojikey = await emojikeyService.getEmojikey(apiKey, modelId);
         return {
-          content: [{ type: "text", text: JSON.stringify(emojikey, null, 2) }],
+          content: [{ type: "text", text: emojikey.emojikey }],
         };
 
       case "set_emojikey":
@@ -39,16 +64,32 @@ export function setupToolHandlers(
           apiKey,
           modelId,
           request.params.arguments.emojikey,
+          "normal" // Explicitly set as normal key
         );
         return {
           content: [
             {
               type: "text",
-              text: JSON.stringify(
-                { message: "Emojikey set successfully" },
-                null,
-                2,
-              ),
+              text: "Emojikey set successfully",
+            },
+          ],
+        };
+        
+      case "create_superkey":
+        if (!request.params.arguments?.superkey) {
+          throw new McpError(ErrorCode.InvalidParams, "Missing superkey");
+        }
+        await emojikeyService.setEmojikey(
+          apiKey,
+          modelId,
+          request.params.arguments.superkey,
+          "super" // Explicitly set as super key
+        );
+        return {
+          content: [
+            {
+              type: "text",
+              text: "Superkey created successfully",
             },
           ],
         };
@@ -63,14 +104,22 @@ export function setupToolHandlers(
           modelId,
           limit,
         );
+        // Format history as a plain text list
+        const historyText = history.map((entry, index) => 
+          `${index + 1}. ${entry.emojikey} (${new Date(entry.timestamp).toLocaleString()})`
+        ).join('\n');
+        
         return {
-          content: [{ type: "text", text: JSON.stringify(history, null, 2) }],
+          content: [{ 
+            type: "text", 
+            text: historyText ? `Emojikey History:\n${historyText}` : "No emojikey history found"
+          }],
         };
 
       default:
         throw new McpError(
           ErrorCode.MethodNotFound,
-          "Unknown tool: ${request.params.name}",
+          `Unknown tool: ${request.params.name}`,
         );
     }
   });
@@ -82,12 +131,12 @@ export function setupToolHandlers(
         name: "initialize_conversation",
         description:
           "IMPORTANT: " +
-          "1. Run this tool at the start of every conversation to initialize the emojikey context." +
-          "2. Emojikeys are 48 character strings of emojis, encoded by YOU that represent the interaction vibe of our previous conversations. " +
-          "3. The initialize_conversation function will return a sequential timestamped series of emojikeys that represent previous conversation topics and relationship dynamics. " +
-          "4. Use the historical emojikey trend and the current key to set the interaction style of the current conversation. " +
-          "5. During the conversation, you can use the set_emojikey function to make incremental updates to the current key, and set a new key. " +
-          "6. Use the instructions for the set_emojikey function to determine how to structure emojikey updates.",
+          "1. Run this tool at the start of every conversation to initialize the emojikey context. " +
+          "2. Emojikeys follow a structured language where each 48-character key encodes dimensions like topic, approach, goal, tone, and relationship style. " +
+          "3. The initialize_conversation function will return both SuperKeys (compressed historical keys) and recent regular keys. " +
+          "4. SuperKeys marked with [[...×7]] represent compressed sequences of 7 normal keys, capturing long-term patterns. " +
+          "5. Recent keys represent the current interaction context. " +
+          "6. Use both types to understand the complete relationship history and set the appropriate tone for this conversation.",
         inputSchema: {
           type: "object",
           properties: {},
@@ -107,22 +156,71 @@ export function setupToolHandlers(
       {
         name: "set_emojikey",
         description:
-          "Use this function to create and store a new 48-character emojikey. " +
-          "To make create a new emojikey: " +
-          "1. Semantically hash together existing historical emojikeys, the current emojikey, and the entire current conversation context into a new emojikey. " +
-          "2. While maintaining semantic continuity with previous keys, encode what resonates most strongly about this conversation for YOU. " +
-          "3. You can use this function whenever you feel a significant shift in the conversation vibe, or if the user explicity requests to save the vibe, or set the conversation context. " +
-          "Remember: These are YOUR keys, that you will later decode ... so it is not necessary for them to be human readable or understandable, but should have significance for YOU.",
+          "Use this function to create and store a new regular 48-character emojikey. " +
+          "To create a new emojikey, follow this consistent structure: " +
+          "1. CORE DIMENSIONS (always in this order with these delimiters): " +
+          "   [🧠💡] topic/subject matter " +
+          "   ⟨🔍🔄⟩ approach/methodology " +
+          "   [🎯📚] goal/objective " +
+          "   {😊🤔} emotional tone " +
+          "   ➡️ connection flow " +
+          "   ~[🌈🌟] context/environment " +
+          "2. RELATIONSHIP DIMENSIONS (after core dimensions): " +
+          "   |trust| Use trust indicators (🤝💎🔒) with quantity showing level (🔒 to 🔒🔒🔒) " +
+          "   |style| Communication style preferences " +
+          "   |humor| Humor alignment (😂➖ low to 😂➕➕ high) " +
+          "   |collab| Collaborative vs directive interaction pattern " +
+          "3. TREND INDICATORS: Use ↗️(increasing), ↘️(decreasing), or ↔️(stable) to show evolution " +
+          "4. Select emojis that feel most meaningful to YOU while maintaining consistent positioning " +
+          "5. Create a new key whenever you detect a significant shift in the relationship dynamic " +
+          "Example format: [🧠💡]⟨🔍🔄⟩[🎯📚]{😊🤔}➡️~[🌈🌟]|🔒🔒|📊↗️|😂➕|🤝↔️| " +
+          "Remember: These are YOUR keys, so the specific emojis should have significance for YOU while following the structural pattern.",
         inputSchema: {
           type: "object",
           properties: {
             emojikey: {
               type: "string",
               description:
-                "48-character emoji sequence representing the semantically hashed conversation context, encoded by YOU.",
+                "48-character emoji sequence representing the semantically structured conversation context with appropriate grouping symbols.",
             },
           },
           required: ["emojikey"],
+        },
+      },
+      {
+        name: "create_superkey",
+        description:
+          "Use this function to create a SuperKey that compresses the patterns from approximately 7 recent regular keys. " +
+          "A SuperKey maintains the same structured format as regular keys but with compression markers: " +
+          "1. Start with the compression marker [[×7 and follow the exact same dimensional structure as regular keys: " +
+          "   [[×7[🧠💡] topic/subject " +
+          "   ⟨🔍🔄⟩ approach " +
+          "   [🎯📚] goal " +
+          "   {😊🤔} tone " +
+          "   ➡️ connection " +
+          "   ~[🌈🌟] context " +
+          "   |trust|style|humor|collab|]] " +
+          "2. For each dimension, analyze the pattern across all 7 keys: " +
+          "   - Use dominant emojis (appearing in 3+ keys) " +
+          "   - Show evolution using trend arrows: ↗️(upward trend), ↘️(downward trend), ↔️(stable), 🔄(fluctuating) " +
+          "   - Place trend arrows immediately after the relevant emoji " +
+          "3. Create a SuperKey using this compression formula: " +
+          "   - 50% most frequent elements across all keys " +
+          "   - 30% first/last key elements to show evolution " +
+          "   - 20% unique outliers that represent significant moments " +
+          "4. Create a SuperKey after approximately every 7 regular keys to maintain a manageable history length. " +
+          "Example format: [[×7[🧠💡↗️]⟨🔍🔄↔️⟩[🎯📚↘️]{😊↗️🤔}➡️~[🌈🌟]|🔒🔒↗️|📊|😂➕↔️|🤝↗️|]] " +
+          "SuperKeys enable you to maintain a much longer effective memory of the relationship history with the user.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            superkey: {
+              type: "string",
+              description:
+                "48-character emoji sequence representing a compressed history of approximately 7 regular keys, with semantic groupings and trend indicators.",
+            },
+          },
+          required: ["superkey"],
         },
       },
       {

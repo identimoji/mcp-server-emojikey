@@ -8,6 +8,7 @@ interface LocalEmojikeyRecord {
   modelId: string;
   userId: string;
   timestamp: string;
+  emojikey_type?: "normal" | "super";
 }
 
 export class LocalEmojikeyService implements EmojikeyService {
@@ -61,13 +62,14 @@ export class LocalEmojikeyService implements EmojikeyService {
     return records[records.length - 1];
   }
 
-  async setEmojikey(apiKey: string, modelId: string, emojikey: string): Promise<void> {
+  async setEmojikey(apiKey: string, modelId: string, emojikey: string, emojikey_type: "normal" | "super" = "normal"): Promise<void> {
     const records = await this.readRecords(apiKey, modelId);
     const newRecord: LocalEmojikeyRecord = {
       emojikey,
       userId: apiKey,
       modelId,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      emojikey_type
     };
     records.push(newRecord);
     await this.writeRecords(apiKey, modelId, records);
@@ -76,5 +78,28 @@ export class LocalEmojikeyService implements EmojikeyService {
   async getEmojikeyHistory(apiKey: string, modelId: string, limit: number = 10): Promise<Emojikey[]> {
     const records = await this.readRecords(apiKey, modelId);
     return records.slice(-limit);
+  }
+  
+  async getEnhancedEmojikeyHistory(
+    apiKey: string, 
+    modelId: string,
+    normalKeyLimit: number = 10,
+    superKeyLimit: number = 5
+  ): Promise<{superkeys: Emojikey[], recentKeys: Emojikey[]}> {
+    const allRecords = await this.readRecords(apiKey, modelId);
+    
+    // Filter records by emojikey_type
+    const superkeys = allRecords
+      .filter(record => record.emojikey_type === "super")
+      .slice(-superKeyLimit);
+      
+    const regularKeys = allRecords
+      .filter(record => !record.emojikey_type || record.emojikey_type === "normal")
+      .slice(-normalKeyLimit);
+    
+    return {
+      superkeys,
+      recentKeys: regularKeys
+    };
   }
 }
