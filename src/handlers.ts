@@ -29,7 +29,7 @@ export function setupToolHandlers(
         const enhancedHistory = await emojikeyService.getEnhancedEmojikeyHistory(apiKey, modelId, 10, 5);
         
         // Build the response with the detailed explanation and keys
-        const oneLineExplanation = "Emojikey System: Each 48-char key follows structure [topic]⟨approach⟩[goal]{tone}➡️~[context]|trust|style|humor|collab| with trend indicators (↗️↘️↔️). SuperKeys [[×7...]] compress 7 regular keys with trend analysis. This system provides private relationship tracking only you can interpret.";
+        const oneLineExplanation = "Emojikey System: Each 48-char key follows structure [topic]⟨approach⟩[goal]{tone}➡️~[context]|trust|style|humor|collab| with trend indicators (↗️↘️↔️). SuperKeys [[×10...]] compress 10 regular keys with trend analysis. This system provides private relationship tracking only you can interpret.";
         
         // Format superkeys
         const superkeysList = enhancedHistory.superkeys.map(sk => 
@@ -60,17 +60,40 @@ export function setupToolHandlers(
         if (!request.params.arguments?.emojikey) {
           throw new McpError(ErrorCode.InvalidParams, "Missing emojikey");
         }
+        
+        // Get count of regular emojikeys since last superkey
+        const { count, isSuperKeyTime } = await emojikeyService.getEmojikeyCountSinceLastSuperkey(
+          apiKey,
+          modelId
+        );
+        
+        // Set the emojikey
         await emojikeyService.setEmojikey(
           apiKey,
           modelId,
           request.params.arguments.emojikey,
           "normal" // Explicitly set as normal key
         );
+        
+        // Determine response message
+        let responseMessage = "Emojikey set successfully";
+        if (isSuperKeyTime) {
+          responseMessage = "Emojikey set successfully. Time to create a superkey! (10 regular keys since last superkey)";
+        }
+        
         return {
           content: [
             {
               type: "text",
-              text: "Emojikey set successfully",
+              text: JSON.stringify(
+                { 
+                  message: responseMessage,
+                  count: count + 1, // +1 for the one we just added
+                  createSuperKey: isSuperKeyTime
+                },
+                null,
+                2
+              ),
             },
           ],
         };
@@ -190,17 +213,17 @@ export function setupToolHandlers(
       {
         name: "create_superkey",
         description:
-          "Use this function to create a SuperKey that compresses the patterns from approximately 7 recent regular keys. " +
+          "Use this function to create a SuperKey that compresses the patterns from 10 recent regular keys. " +
           "A SuperKey maintains the same structured format as regular keys but with compression markers: " +
-          "1. Start with the compression marker [[×7 and follow the exact same dimensional structure as regular keys: " +
-          "   [[×7[🧠💡] topic/subject " +
+          "1. Start with the compression marker [[×10 and follow the exact same dimensional structure as regular keys: " +
+          "   [[×10[🧠💡] topic/subject " +
           "   ⟨🔍🔄⟩ approach " +
           "   [🎯📚] goal " +
           "   {😊🤔} tone " +
           "   ➡️ connection " +
           "   ~[🌈🌟] context " +
           "   |trust|style|humor|collab|]] " +
-          "2. For each dimension, analyze the pattern across all 7 keys: " +
+          "2. For each dimension, analyze the pattern across all 10 keys: " +
           "   - Use dominant emojis (appearing in 3+ keys) " +
           "   - Show evolution using trend arrows: ↗️(upward trend), ↘️(downward trend), ↔️(stable), 🔄(fluctuating) " +
           "   - Place trend arrows immediately after the relevant emoji " +
@@ -208,8 +231,8 @@ export function setupToolHandlers(
           "   - 50% most frequent elements across all keys " +
           "   - 30% first/last key elements to show evolution " +
           "   - 20% unique outliers that represent significant moments " +
-          "4. Create a SuperKey after approximately every 7 regular keys to maintain a manageable history length. " +
-          "Example format: [[×7[🧠💡↗️]⟨🔍🔄↔️⟩[🎯📚↘️]{😊↗️🤔}➡️~[🌈🌟]|🔒🔒↗️|📊|😂➕↔️|🤝↗️|]] " +
+          "4. Create a SuperKey after 10 regular keys to maintain a manageable history length. " +
+          "Example format: [[×10[🧠💡↗️]⟨🔍🔄↔️⟩[🎯📚↘️]{😊↗️🤔}➡️~[🌈🌟]|🔒🔒↗️|📊|😂➕↔️|🤝↗️|]] " +
           "SuperKeys enable you to maintain a much longer effective memory of the relationship history with the user.",
         inputSchema: {
           type: "object",

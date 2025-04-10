@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { EmojikeyService, EmojikeyError } from "./service.js";
+import { EmojikeyService, EmojikeyError, EmojikeyCountResult } from "./service.js";
 import { Emojikey } from "./types.js";
 import { SUPABASE_CONFIG } from "./config.js";
 
@@ -100,6 +100,73 @@ export class SupabaseEmojikeyService implements EmojikeyService {
     } catch (err: unknown) {
       const error = err as Error;
       throw new EmojikeyError(`Emojikey history retrieval failed: ${error.message}`);
+    }
+  }
+  
+  async getEmojikeyCountSinceLastSuperkey(
+    apiKey: string,
+    modelId: string
+  ): Promise<EmojikeyCountResult> {
+    try {
+      const userId = await this.getUserIdFromApiKey(apiKey);
+      
+      // Get most recent superkey timestamp
+      const { data: superkeys, error: superkeysError } = await this.supabase.rpc(
+        "get_user_emojikeys_by_type", 
+        {
+          input_user_id: userId,
+          input_model: modelId,
+          input_emojikey_type: "super",
+          history_limit: 1
+        }
+      );
+      
+      if (superkeysError) throw new Error(`Failed to get superkeys: ${superkeysError.message}`);
+      
+      // Get normal keys
+      let query: any;
+      if (superkeys && superkeys.length > 0) {
+        // Get last superkey creation time
+        const lastSuperKeyTime = superkeys[0].created_at;
+        
+        // Count normal keys created after the last superkey
+        const { data: count, error: countError } = await this.supabase.rpc(
+          "count_emojikeys_since_timestamp",
+          {
+            input_user_id: userId,
+            input_model: modelId,
+            input_timestamp: lastSuperKeyTime,
+            input_emojikey_type: "normal"
+          }
+        );
+        
+        if (countError) throw new Error(`Failed to count emojikeys: ${countError.message}`);
+        
+        return {
+          count: count || 0,
+          isSuperKeyTime: (count || 0) >= 10
+        };
+      } else {
+        // No superkeys exist yet, count all normal keys
+        const { data: count, error: countError } = await this.supabase.rpc(
+          "count_emojikeys_by_type",
+          {
+            input_user_id: userId,
+            input_model: modelId,
+            input_emojikey_type: "normal"
+          }
+        );
+        
+        if (countError) throw new Error(`Failed to count emojikeys: ${countError.message}`);
+        
+        return {
+          count: count || 0,
+          isSuperKeyTime: (count || 0) >= 10
+        };
+      }
+    } catch (err: unknown) {
+      const error = err as Error;
+      throw new EmojikeyError(`Emojikey count retrieval failed: ${error.message}`);
     }
   }
   

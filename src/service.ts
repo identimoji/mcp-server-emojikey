@@ -1,5 +1,11 @@
 import { Emojikey } from "./types.js";
 
+// Interface for the emojikeyCount response
+export interface EmojikeyCountResult {
+  count: number;
+  isSuperKeyTime: boolean;
+}
+
 // Main interface that both API and local implementations will follow
 export interface EmojikeyService {
   // Get emojikey for conversation initialization or when requested
@@ -22,6 +28,12 @@ export interface EmojikeyService {
     normalKeyLimit?: number,
     superKeyLimit?: number,
   ): Promise<{superkeys: Emojikey[], recentKeys: Emojikey[]}>;
+  
+  // Get count of regular emojikeys since last superkey
+  getEmojikeyCountSinceLastSuperkey(
+    userId: string,
+    modelId: string,
+  ): Promise<EmojikeyCountResult>;
 }
 
 // Error class for emojikey-specific errors
