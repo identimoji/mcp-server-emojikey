@@ -1,4 +1,4 @@
-import { EmojikeyService, EmojikeyError } from "./service.js";
+import { EmojikeyService, EmojikeyError, EmojikeyCountResult } from "./service.js";
 import { Emojikey } from "./types.js";
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -100,6 +100,46 @@ export class LocalEmojikeyService implements EmojikeyService {
     return {
       superkeys,
       recentKeys: regularKeys
+    };
+  }
+  
+  async getEmojikeyCountSinceLastSuperkey(
+    apiKey: string,
+    modelId: string
+  ): Promise<EmojikeyCountResult> {
+    const allRecords = await this.readRecords(apiKey, modelId);
+    
+    // Sort records by timestamp in descending order
+    const sortedRecords = [...allRecords].sort((a, b) => 
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+    
+    // Find the index of the most recent superkey
+    const superKeyIndex = sortedRecords.findIndex(record => 
+      record.emojikey_type === "super"
+    );
+    
+    let count = 0;
+    
+    if (superKeyIndex === -1) {
+      // No superkey found, count all normal keys
+      count = sortedRecords.filter(record => 
+        !record.emojikey_type || record.emojikey_type === "normal"
+      ).length;
+    } else {
+      // Get the timestamp of the most recent superkey
+      const lastSuperKeyTime = new Date(sortedRecords[superKeyIndex].timestamp);
+      
+      // Count normal keys created after the last superkey
+      count = sortedRecords.filter(record => 
+        (!record.emojikey_type || record.emojikey_type === "normal") && 
+        new Date(record.timestamp) > lastSuperKeyTime
+      ).length;
+    }
+    
+    return {
+      count,
+      isSuperKeyTime: count >= 10
     };
   }
 }
