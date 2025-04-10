@@ -3,6 +3,7 @@
   "version": "0.2.0",
   "description": "MCP Protocol for persisting LLM interaction style as emojikeys",
   "type": "module",
+  "license": "MIT",
   "bin": {
     "mcp-server-emojikey": "./build/index.js"
   },
