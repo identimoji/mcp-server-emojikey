@@ -2,6 +2,18 @@
 
 MCP server for persisting LLM relationship context as emoji-based memory keys. This allows Claude to maintain consistent interaction styles and remember relationship context across conversations.
 
+Emojikeys are stored online, so you can use them across devices and applications. No user information is stored other than the emojikeys.
+
+<a href="https://glama.ai/mcp/servers/e042rg25ct">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/e042rg25ct/badge" alt="emojikey-server Server MCP server" />
+</a>
+
+> 📝 **Note**
+> Usage note: The first time you use the tool in Claude desktop, tell Claude to "Set emojikey" then next time you start a conversation, he will automatically use this key. You can ask to set vibe, or show emojikey history as well. Have fun!
+
+> ⚠️ **Warning**
+> This is a beta version, more features are planned, so the API may change.
+
 ## Usage with Claude Desktop
 
 Get your API key from [emojikey.io](https://emojikey.io) and add this to your config:
