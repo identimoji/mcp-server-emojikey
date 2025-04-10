@@ -4,3 +4,8 @@ export interface Emojikey {
   userId: string;
   timestamp: string;
 }
+
+export interface EmojikeyCountResult {
+  count: number;
+  isSuperKeyTime: boolean;
+}

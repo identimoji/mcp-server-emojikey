@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
-import { EmojikeyService, EmojikeyError } from "./service.js";
-import { Emojikey } from "./types.js";
+import { EmojikeyService, EmojikeyError, isSuperKey } from "./service.js";
+import { Emojikey, EmojikeyCountResult } from "./types.js";
 import { SUPABASE_CONFIG } from "./config.js";
 
 interface EmojikeyRecord {
@@ -74,7 +74,7 @@ export class SupabaseEmojikeyService implements EmojikeyService {
     apiKey: string,
     modelId: string,
     emojikey: string,
-  ): Promise<void> {
+  ): Promise<EmojikeyCountResult> {
     try {
       const userId = await this.getUserIdFromApiKey(apiKey);
       console.log("Setting emojikey:", { userId, modelId, emojikey });
@@ -87,9 +87,86 @@ export class SupabaseEmojikeyService implements EmojikeyService {
 
       if (error)
         throw new EmojikeyError("Failed to set emojikey: " + error.message);
+      
+      // Get count since last superkey if this wasn't a superkey
+      if (!isSuperKey(emojikey)) {
+        return await this.getEmojikeyCount(apiKey, modelId);
+      } else {
+        return { count: 0, isSuperKeyTime: false };
+      }
     } catch (err) {
       const error = err as Error;
       throw new EmojikeyError(`Emojikey update failed: ${error.message}`);
+    }
+  }
+  
+  async getEmojikeyCount(
+    apiKey: string,
+    modelId: string,
+  ): Promise<EmojikeyCountResult> {
+    try {
+      const userId = await this.getUserIdFromApiKey(apiKey);
+      console.log("Getting emojikey count:", { userId, modelId });
+
+      // Get recent emojikeys to count them
+      const { data, error } = await this.supabase.rpc("get_user_emojikey_history", {
+        input_user_id: userId,
+        input_model: modelId,
+        history_limit: 100, // Large enough to find recent superkey
+      });
+
+      if (error)
+        throw new EmojikeyError("Failed to get emojikey history: " + error.message);
+        
+      if (!data || data.length === 0) {
+        return { count: 0, isSuperKeyTime: false };
+      }
+      
+      // Find index of most recent superkey
+      const superKeyIndex = data.findIndex((record: EmojikeyRecord) => 
+        isSuperKey(record.emojikey));
+      
+      // If no superkey found, count all regular keys
+      // If superkey found, count keys that come before it
+      const count = superKeyIndex === -1 ? data.length : superKeyIndex;
+      const isSuperKeyTime = count >= 10;
+      
+      return {
+        count,
+        isSuperKeyTime
+      };
+    } catch (err) {
+      const error = err as Error;
+      throw new EmojikeyError(`Emojikey count retrieval failed: ${error.message}`);
+    }
+  }
+  
+  async createSuperKey(
+    apiKey: string,
+    modelId: string,
+    superKey: string,
+  ): Promise<void> {
+    try {
+      const userId = await this.getUserIdFromApiKey(apiKey);
+      
+      // Ensure superKey has the correct format
+      if (!isSuperKey(superKey)) {
+        throw new EmojikeyError("Superkey must be enclosed in [[ ]] double brackets");
+      }
+      
+      console.log("Creating superkey:", { userId, modelId, superKey });
+
+      const { error } = await this.supabase.rpc("set_user_emojikey", {
+        input_user_id: userId,
+        input_model: modelId,
+        input_emojikey: superKey,
+      });
+
+      if (error)
+        throw new EmojikeyError("Failed to set superkey: " + error.message);
+    } catch (err) {
+      const error = err as Error;
+      throw new EmojikeyError(`Superkey creation failed: ${error.message}`);
     }
   }
 

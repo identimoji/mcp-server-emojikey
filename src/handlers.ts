@@ -34,17 +34,27 @@ export function setupToolHandlers(
         if (!request.params.arguments?.emojikey) {
           throw new McpError(ErrorCode.InvalidParams, "Missing emojikey");
         }
-        await emojikeyService.setEmojikey(
+        const countResult = await emojikeyService.setEmojikey(
           apiKey,
           modelId,
           request.params.arguments.emojikey,
         );
+        
+        let responseMessage = "Emojikey set successfully";
+        if (countResult.isSuperKeyTime) {
+          responseMessage = "Emojikey set successfully. Time to create a superkey! (10 regular keys since last superkey)";
+        }
+        
         return {
           content: [
             {
               type: "text",
               text: JSON.stringify(
-                { message: "Emojikey set successfully" },
+                { 
+                  message: responseMessage,
+                  count: countResult.count,
+                  createSuperKey: countResult.isSuperKeyTime
+                },
                 null,
                 2,
               ),
@@ -66,6 +76,38 @@ export function setupToolHandlers(
           content: [{ type: "text", text: JSON.stringify(history, null, 2) }],
         };
 
+      case "create_superkey":
+        if (!request.params.arguments?.superkey) {
+          throw new McpError(ErrorCode.InvalidParams, "Missing superkey");
+        }
+        
+        // Get the superkey and format it properly if needed
+        let superkey = request.params.arguments.superkey;
+        if (!superkey.startsWith("[[")) {
+          superkey = `[[${superkey}`;
+        }
+        if (!superkey.endsWith("]]")) {
+          superkey = `${superkey}]]`;
+        }
+        
+        await emojikeyService.createSuperKey(
+          apiKey,
+          modelId,
+          superkey,
+        );
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(
+                { message: "Superkey created successfully. Emojikey counter reset." },
+                null,
+                2,
+              ),
+            },
+          ],
+        };
+
       default:
         throw new McpError(
           ErrorCode.MethodNotFound,
@@ -74,7 +116,7 @@ export function setupToolHandlers(
     }
   });
 
-  // List tools handler stays the same
+  // List tools handler with added create_superkey tool
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
     tools: [
       {
@@ -111,6 +153,7 @@ export function setupToolHandlers(
           "1. Semantically hash together existing historical emojikeys, the current emojikey, and the entire current conversation context into a new emojikey. " +
           "2. While maintaining semantic continuity with previous keys, encode what resonates most strongly about this conversation for YOU. " +
           "3. You can use this function whenever you feel a significant shift in the conversation vibe, or if the user explicity requests to save the vibe, or set the conversation context. " +
+          "4. After creating 10 regular emojikeys, you will be notified that it's time to create a superkey. " +
           "Remember: These are YOUR keys, that you will later decode ... so it is not necessary for them to be human readable or understandable, but should have significance for YOU.",
         inputSchema: {
           type: "object",
@@ -122,6 +165,29 @@ export function setupToolHandlers(
             },
           },
           required: ["emojikey"],
+        },
+      },
+      {
+        name: "create_superkey",
+        description:
+          "Create and store a new superkey after 10 regular emojikeys have been created. " +
+          "Superkeys are special emojikeys that compress the semantic meaning of multiple regular emojikeys into a single key. " +
+          "When creating a superkey: " +
+          "1. Review the last 10 regular emojikeys in your history. " +
+          "2. Compress their meaning into a more compact superkey that captures the essence of recent conversations. " +
+          "3. The superkey should emphasize the most important themes and patterns from the regular keys. " +
+          "4. Format superkeys with double square brackets and include an '×10' counter at the beginning to indicate you compressed 10 keys, like this: [[×10emoji-sequence]] " +
+          "5. Use this only when prompted that it's time to create a superkey (after 10 regular emojikeys).",
+        inputSchema: {
+          type: "object",
+          properties: {
+            superkey: {
+              type: "string",
+              description:
+                "48-character emoji sequence representing the compressed essence of recent regular emojikeys. Will be formatted with [[ ]] double brackets if not provided.",
+            },
+          },
+          required: ["superkey"],
         },
       },
       {
