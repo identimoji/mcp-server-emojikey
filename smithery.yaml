@@ -1,0 +1,24 @@
+# Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
+
+startCommand:
+  type: stdio
+  configSchema:
+    # JSON Schema defining the configuration options for the MCP.
+    type: object
+    required:
+      - apiKey
+      - modelId
+    properties:
+      apiKey:
+        type: string
+        description: API key from emojikey.io
+      modelId:
+        type: string
+        description: Model ID to use, e.g., Claude-3-5-Sonnet-20241022
+  commandFunction:
+    # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
+    |-
+    (config) => ({ command: 'node', args: ['build/index.js'], env: { EMOJIKEYIO_API_KEY: config.apiKey, MODEL_ID: config.modelId } })
+  exampleConfig:
+    apiKey: your-api-key-from-emojikey.io
+    modelId: Claude-3-5-Sonnet-20241022
