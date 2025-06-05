@@ -1,7 +1,7 @@
 {
   "name": "@identimoji/mcp-server-emojikey",
-  "version": "0.2.1",
-  "description": "MCP Protocol for persisting LLM interaction style as emojikeys",
+  "version": "0.3.1",
+  "description": "MCP Protocol for persisting LLM interaction style as emojikeys with coding context support",
   "type": "module",
   "license": "MIT",
   "bin": {
@@ -17,16 +17,24 @@
     "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
     "prepare": "npm run build",
     "watch": "tsc --watch",
-    "inspector": "npx @modelcontextprotocol/inspector build/index.js"
+    "inspector": "npx @modelcontextprotocol/inspector build/index.js",
+    "start": "node build/index.js",
+    "start:code": "CODE_MODE=true node build/index.js",
+    "build:simple": "./build-simple.sh",
+    "start:simple": "node build-simple/index.js",
+    "build:full": "./full-build.sh",
+    "test:init": "node test-emojikey-init.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.6.0",
     "@supabase/supabase-js": "^2.47.2",
     "axios": "^1.7.9",
-    "dotenv": "^16.4.7"
+    "dotenv": "^16.5.0",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@types/node": "^20.17.9",
+    "@types/uuid": "^9.0.8",
     "typescript": "^5.7.2"
   }
 }

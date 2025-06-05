@@ -18,7 +18,7 @@ export class SupabaseEmojikeyService implements EmojikeyService {
     });
   }
 
-  private async getUserIdFromApiKey(apiKey: string): Promise<string> {
+  async getUserIdFromApiKey(apiKey: string): Promise<string> {
     try {
       const { data, error } = await this.supabase.rpc("check_api_key", {
         check_key: apiKey

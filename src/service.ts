@@ -34,6 +34,9 @@ export interface EmojikeyService {
     userId: string,
     modelId: string,
   ): Promise<EmojikeyCountResult>;
+  
+  // Get user ID from API key
+  getUserIdFromApiKey(apiKey: string): Promise<string>;
 }
 
 // Error class for emojikey-specific errors

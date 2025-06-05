@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+    "outDir": "./build-simple",
+    "rootDir": "./src",
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "src/index.simplified.ts", 
+    "src/handlers.ts",
+    "src/service.ts",
+    "src/service.local.ts",
+    "src/service.supabase.ts",
+    "src/config.ts",
+    "src/types.ts"
+  ],
+  "exclude": [
+    "node_modules", 
+    "build", 
+    "src/edge-functions/**/*",
+    "src/code_analyzer.ts",
+    "src/coding_dimensions.ts",
+    "src/handlers_integration.ts",
+    "src/handlers_coding.ts",
+    "src/vector_config.ts"
+  ]
+}

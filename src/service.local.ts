@@ -53,6 +53,13 @@ export class LocalEmojikeyService implements EmojikeyService {
     }
   }
 
+  // Adding the missing method
+  async getUserIdFromApiKey(apiKey: string): Promise<string> {
+    // For local storage, we'll use apiKey directly as userId
+    // In a real implementation, this would look up the user ID from the API key
+    return apiKey;
+  }
+
   async getEmojikey(apiKey: string, modelId: string): Promise<Emojikey> {
     // For local storage, we'll use apiKey as userId
     const records = await this.readRecords(apiKey, modelId);

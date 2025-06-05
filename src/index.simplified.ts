@@ -8,7 +8,6 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { SERVER_CONFIG } from "./config.js";
 import { setupToolHandlers } from "./handlers.js";
 import { SupabaseEmojikeyService } from "./service.supabase.js";
-import { integrateCodingFeatures } from "./handlers_integration.js";
 
 // Main server class that coordinates everything
 class EmojikeyServer {
@@ -36,22 +35,10 @@ class EmojikeyServer {
   private setup(): void {
     this.setupErrorHandling();
     
-    // Get original handlers
-    const originalHandlers = {};
-    setupToolHandlers(this.server, this.emojikeyService, originalHandlers);
+    // Set up the handlers without coding features
+    setupToolHandlers(this.server, this.emojikeyService);
     
-    // Only enable coding features if explicitly enabled via environment
-    if (process.env.CODE_MODE === "true") {
-      try {
-        integrateCodingFeatures(this.server, originalHandlers, this.emojikeyService);
-        console.error("Emojikey server initialized with coding features enabled");
-      } catch (error) {
-        console.error("Failed to integrate coding features:", error);
-        console.error("Coding features will be disabled");
-      }
-    } else {
-      console.error("Emojikey server initialized (coding features disabled - use CODE_MODE=true to enable)");
-    }
+    console.error("Emojikey server initialized (simplified version)");
   }
 
   private setupErrorHandling(): void {
@@ -70,9 +57,7 @@ class EmojikeyServer {
   async run(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    
-    const codingMode = process.env.CODE_MODE === "true" ? "enabled" : "disabled";
-    console.error(`Emojikey MCP server running on stdio (coding features ${codingMode})`);
+    console.error("Emojikey MCP server running on stdio (simplified version)");
   }
 }
 
