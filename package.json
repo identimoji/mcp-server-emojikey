@@ -1,6 +1,6 @@
 {
   "name": "@identimoji/mcp-server-emojikey",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "MCP Protocol for persisting LLM interaction style as emojikeys with coding context support",
   "type": "module",
   "license": "MIT",
