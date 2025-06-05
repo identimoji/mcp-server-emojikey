@@ -1,5 +1,7 @@
 # mcp-server-emojikey
 
+[![smithery badge](https://smithery.ai/badge/@identimoji/mcp-server-emojikey)](https://smithery.ai/server/@identimoji/mcp-server-emojikey)
+
 MCP server for persisting LLM relationship context as emoji-based memory keys. This allows Claude to maintain consistent interaction styles and remember relationship context across conversations.
 
 Emojikeys are stored online, so you can use them across devices and applications. No user information is stored other than the emojikeys.
