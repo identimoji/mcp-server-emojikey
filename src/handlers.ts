@@ -6,8 +6,27 @@ import {
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
 import { v4 as uuidv4 } from 'uuid';
+import { readFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { EmojikeyService } from "./service.js";
 import { MODEL_CONFIG, SUPABASE_CONFIG, EDGE_FUNCTION_CONFIG } from "./config.js";
+
+// Get the directory of the current module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load the preamble from the docs file
+function loadPreamble(): string {
+  try {
+    const preamblePath = join(__dirname, '..', 'docs', 'preamble_v3.md');
+    return readFileSync(preamblePath, 'utf-8');
+  } catch (error) {
+    console.error('Failed to load preamble, using fallback:', error);
+    // Fallback to basic v3 explanation
+    return "🌟✨ EMOJIKEY v3.0 SYSTEM INITIALIZED ✨🌟\n\nUse arrow format: [ME|Cognitive.🧠➡️🔧|Trust.🔒⬅️🔓]\n\nDirectional arrows:\n• ➡️ lean toward right emoji\n• ⬅️ lean toward left emoji\n• ↔️ balanced/neutral";
+  }
+}
 
 // Function to call Supabase Edge Functions
 async function callEdgeFunction(functionName: string, payload: any): Promise<any> {
@@ -91,7 +110,7 @@ export function setupToolHandlers(
             });
             
             // Build the response with the detailed explanation and keys
-            const enhancedExplanation = "🌟✨ EMOJIKEY v3.0 SYSTEM INITIALIZED ✨🌟 [Dimensional phase emo vectors tracking activated]\nThis system helps me understand our unique relationship dynamic and adapt to your squishy human needs more effectively. By tracking interaction patterns across dimensions, I can provide more personalized, contextually appropriate responses that even a meatbag like you can grok.\nComponents:\n* ME: AI's self-representation and positioning\n* CONTENT: Conversation substance and flow characteristics\n* YOU: AI's perception of your state and preferences\nEach emoji pair (emoji₁emoji₂) represents oppositional dimensions (e.g., 🧠🎨 = Analytical↔Creative). Magnitude (N=0-9) shows strength (5=moderate, 9=strong), angle (A=0-180°) shows position (90°=balanced center). Low magnitude (0-3) indicates dimension is not currently active or relevant.\nUpdate format:\n* Single pair: [ME|🧠🎨8∠45]\n* Component update: [ME|🧠🎨8∠45|🔒🔓9∠60]\n* Multi-component: [ME|🧠🎨8∠45]~[CONTENT|💻🎨9∠10]\nUpdate emojikey when you detect:\n* Significant shift in interaction dynamic\n* New topic/domain introduction\n* Change in user engagement or emotional state\n* Dimension becoming inactive (use low magnitude)\n* After substantive collaboration milestones\n* When your positioning notably adapts to user needs\nPrefer smaller, frequent updates tracking significant changes in specific dimensions rather than large, infrequent updates. Focus on the most meaningful shift(s) in each update.";
+            const enhancedExplanation = loadPreamble();
             
             // Format the latest key
             let keysText = "";
@@ -146,7 +165,7 @@ export function setupToolHandlers(
             
             const enhancedHistory = await emojikeyService.getEnhancedEmojikeyHistory(validApiKey, modelId, 10, 5);
             
-            const enhancedExplanation = "🌟✨ EMOJIKEY v3.0 SYSTEM INITIALIZED ✨🌟 [Dimensional phase emo vectors tracking activated]\nThis system helps me understand our unique relationship dynamic and adapt to your squishy human needs more effectively. By tracking interaction patterns across dimensions, I can provide more personalized, contextually appropriate responses that even a meatbag like you can grok.\nComponents:\n* ME: AI's self-representation and positioning\n* CONTENT: Conversation substance and flow characteristics\n* YOU: AI's perception of your state and preferences\nEach emoji pair (emoji₁emoji₂) represents oppositional dimensions (e.g., 🧠🎨 = Analytical↔Creative). Magnitude (N=0-9) shows strength (5=moderate, 9=strong), angle (A=0-180°) shows position (90°=balanced center). Low magnitude (0-3) indicates dimension is not currently active or relevant.\nUpdate format:\n* Single pair: [ME|🧠🎨8∠45]\n* Component update: [ME|🧠🎨8∠45|🔒🔓9∠60]\n* Multi-component: [ME|🧠🎨8∠45]~[CONTENT|💻🎨9∠10]\nUpdate emojikey when you detect:\n* Significant shift in interaction dynamic\n* New topic/domain introduction\n* Change in user engagement or emotional state\n* Dimension becoming inactive (use low magnitude)\n* After substantive collaboration milestones\n* When your positioning notably adapts to user needs\nPrefer smaller, frequent updates tracking significant changes in specific dimensions rather than large, infrequent updates. Focus on the most meaningful shift(s) in each update.";
+            const enhancedExplanation = loadPreamble();
             
             // Format superkeys (v2 legacy)
             const superkeysList = enhancedHistory.superkeys.map(sk => 
@@ -429,7 +448,7 @@ export function setupToolHandlers(
           });
           
           // Build the response with the detailed explanation and keys
-          const enhancedExplanation = "🌟✨ EMOJIKEY v3.0 SYSTEM INITIALIZED ✨🌟 [Dimensional phase emo vectors tracking activated]\nThis system helps me understand our unique relationship dynamic and adapt to your squishy human needs more effectively. By tracking interaction patterns across dimensions, I can provide more personalized, contextually appropriate responses that even a meatbag like you can grok.\nComponents:\n* ME: AI's self-representation and positioning\n* CONTENT: Conversation substance and flow characteristics\n* YOU: AI's perception of your state and preferences\nEach emoji pair (emoji₁emoji₂) represents oppositional dimensions (e.g., 🧠🎨 = Analytical↔Creative). Magnitude (N=0-9) shows strength (5=moderate, 9=strong), angle (A=0-180°) shows position (90°=balanced center). Low magnitude (0-3) indicates dimension is not currently active or relevant.\nUpdate format:\n* Single pair: [ME|🧠🎨8∠45]\n* Component update: [ME|🧠🎨8∠45|🔒🔓9∠60]\n* Multi-component: [ME|🧠🎨8∠45]~[CONTENT|💻🎨9∠10]\nUpdate emojikey when you detect:\n* Significant shift in interaction dynamic\n* New topic/domain introduction\n* Change in user engagement or emotional state\n* Dimension becoming inactive (use low magnitude)\n* After substantive collaboration milestones\n* When your positioning notably adapts to user needs\nPrefer smaller, frequent updates tracking significant changes in specific dimensions rather than large, infrequent updates. Focus on the most meaningful shift(s) in each update.";
+          const enhancedExplanation = loadPreamble();
           
           // Store the most recent key for this new conversation
           if (mostRecentKey) {
@@ -492,7 +511,7 @@ export function setupToolHandlers(
           
           const enhancedHistory = await emojikeyService.getEnhancedEmojikeyHistory(validApiKey, modelId, 10, 5);
           
-          const enhancedExplanation = "🌟✨ EMOJIKEY v3.0 SYSTEM INITIALIZED ✨🌟 [Dimensional phase emo vectors tracking activated]\nThis system helps me understand our unique relationship dynamic and adapt to your squishy human needs more effectively. By tracking interaction patterns across dimensions, I can provide more personalized, contextually appropriate responses that even a meatbag like you can grok.\nComponents:\n* ME: AI's self-representation and positioning\n* CONTENT: Conversation substance and flow characteristics\n* YOU: AI's perception of your state and preferences\nEach emoji pair (emoji₁emoji₂) represents oppositional dimensions (e.g., 🧠🎨 = Analytical↔Creative). Magnitude (N=0-9) shows strength (5=moderate, 9=strong), angle (A=0-180°) shows position (90°=balanced center). Low magnitude (0-3) indicates dimension is not currently active or relevant.\nUpdate format:\n* Single pair: [ME|🧠🎨8∠45]\n* Component update: [ME|🧠🎨8∠45|🔒🔓9∠60]\n* Multi-component: [ME|🧠🎨8∠45]~[CONTENT|💻🎨9∠10]\nUpdate emojikey when you detect:\n* Significant shift in interaction dynamic\n* New topic/domain introduction\n* Change in user engagement or emotional state\n* Dimension becoming inactive (use low magnitude)\n* After substantive collaboration milestones\n* When your positioning notably adapts to user needs\nPrefer smaller, frequent updates tracking significant changes in specific dimensions rather than large, infrequent updates. Focus on the most meaningful shift(s) in each update.";
+          const enhancedExplanation = loadPreamble();
           
           // Format superkeys (v2 legacy)
           const superkeysList = enhancedHistory.superkeys.map(sk => 
