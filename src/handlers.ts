@@ -1,4 +1,4 @@
-// handlers.ts - Updated for emojikey v3 with conversation ID support
+// handlers.ts - Updated for emojikey v3 with conversation ID support and direct database writes
 import {
   ListToolsRequestSchema,
   CallToolRequestSchema,
@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { createClient } from "@supabase/supabase-js";
 import { EmojikeyService } from "./service.js";
 import { MODEL_CONFIG, SUPABASE_CONFIG, EDGE_FUNCTION_CONFIG } from "./config.js";
 
@@ -73,6 +74,11 @@ export function setupToolHandlers(
   emojikeyService: EmojikeyService,
   originalHandlers?: any
 ) {
+  // Initialize Supabase client for direct database access
+  const supabase = createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.KEY, {
+    db: { schema: "public" }
+  });
+
   // Main request handler function for all tools
   const requestHandler = async (request: any) => {
     const apiKey = process.env.EMOJIKEYIO_API_KEY;
@@ -246,19 +252,29 @@ export function setupToolHandlers(
           const conversationId = request.params.arguments?.conversation_id;
           
           if (conversationId) {
-            // Use v3 approach with Edge Functions
+            // Use v3 approach with direct database insert
             const userId = await emojikeyService.getUserIdFromApiKey(validApiKey);
             
             // Format is now [ME|🧠🎨8∠45|🔒🔓9∠60]
             const emojikey = request.params.arguments.emojikey;
             
-            // Call the update edge function
-            const result = await callEdgeFunction("updateEmojikey", {
-              emojikey,
-              user_id: userId,
-              model_id: modelId,
-              conversation_id: conversationId
-            });
+            // Direct database insert into emojikeys table (this will trigger processing)
+            const { data, error } = await supabase
+              .from('emojikeys')
+              .insert({
+                user_id: userId,
+                model: modelId,
+                emojikey: emojikey,
+                conversation_id: conversationId,
+                created_at: new Date().toISOString(),
+                emojikey_type: 'normal'
+              })
+              .select();
+            
+            if (error) {
+              console.error('Database insert error:', error);
+              throw new McpError(ErrorCode.InternalError, `Failed to store emojikey: ${error.message}`);
+            }
             
             return {
               content: [
@@ -614,19 +630,29 @@ export function setupToolHandlers(
         const conversationId = request.params.arguments?.conversation_id;
         
         if (conversationId) {
-          // Use v3 approach with Edge Functions
+          // Use v3 approach with direct database insert
           const userId = await emojikeyService.getUserIdFromApiKey(validApiKey);
           
           // Format is now [ME|🧠🎨8∠45|🔒🔓9∠60]
           const emojikey = request.params.arguments.emojikey;
           
-          // Call the update edge function
-          const result = await callEdgeFunction("updateEmojikey", {
-            emojikey,
-            user_id: userId,
-            model_id: modelId,
-            conversation_id: conversationId
-          });
+          // Direct database insert into emojikeys table (this will trigger processing)
+          const { data, error } = await supabase
+            .from('emojikeys')
+            .insert({
+              user_id: userId,
+              model: modelId,
+              emojikey: emojikey,
+              conversation_id: conversationId,
+              created_at: new Date().toISOString(),
+              emojikey_type: 'normal'
+            })
+            .select();
+          
+          if (error) {
+            console.error('Database insert error:', error);
+            throw new McpError(ErrorCode.InternalError, `Failed to store emojikey: ${error.message}`);
+          }
           
           return {
             content: [
