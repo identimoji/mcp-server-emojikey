@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/identimoji-mcp-server-emojikey-badge.png)](https://mseep.ai/app/identimoji-mcp-server-emojikey)
+
 # mcp-server-emojikey
 
 [![smithery badge](https://smithery.ai/badge/@identimoji/mcp-server-emojikey)](https://smithery.ai/server/@identimoji/mcp-server-emojikey)
